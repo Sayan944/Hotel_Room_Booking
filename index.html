@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LUXESTAY — Hotel Management System</title>
+<style>
+  @import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,400&family=Jost:wght@300;400;500;600&display=swap");
+
+  :root {
+    --cream: #F4F4F4;
+    --teal: #00B7B5;
+    --teal-dark: #005461;
+    --ink: #018790;
+    --text: #163B3C;
+    --text-soft: #3E5453;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    height: 100%;
+    margin: 0;
+  }
+
+  body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    font-family: "Jost", -apple-system, sans-serif;
+    position: relative;
+    overflow-x: hidden;
+    background: linear-gradient(125deg, #ffffff 0%, #f4faf9 38%, #d9f0ec 75%, #c7ebe4 100%);
+  }
+
+  /* ---------- Top bar ---------- */
+  .topbar {
+    padding: 1.75rem 2.5rem 0 4rem;
+  }
+
+  .topbar__label {
+    text-transform: uppercase;
+    letter-spacing: 0.24em;
+    font-size: 0.72rem;
+    color: var(--teal-dark);
+    opacity: 0.85;
+    margin: 0;
+  }
+
+  /* ---------- Two-column layout ---------- */
+  .page-layout {
+    flex: 1;
+    display: flex;
+    /* align-items: center; */
+    flex-wrap: wrap;
+    gap: 2rem;
+    max-width: 1600px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 2rem 2.5rem 3rem 4rem;
+  }
+
+  .left-col {
+    flex: 1 1 400px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+    padding-top: 67px;
+    padding-left:39px;
+
+  }
+
+  .right-col {
+    flex: 1 1 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /* height:300px; */
+  }
+
+  .brand-row {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .brand-row__logo {
+    width: 92px;
+    height: 92px;
+    padding: 8px;
+    background: #ffffff;
+    border-radius: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 6px 20px rgba(0, 84, 97, 0.18);
+    flex-shrink: 0;
+  }
+
+  .brand-row__logo img {
+    width: 100%;
+    height: 100%;
+    border-radius: 100%;
+    object-fit: contain;
+  }
+
+  .brand-row__name {
+    font-family: "Cormorant Garamond", serif;
+    font-weight: 600;
+    font-size: clamp(2.1rem, 4.5vw, 3.1rem);
+    letter-spacing: 0.06em;
+    color: var(--teal-dark);
+  }
+
+  @media (max-width: 560px) {
+    .brand-row { flex-direction: column; align-items: flex-start; gap: 1rem; }
+  }
+
+  .hero-text {
+    max-width: 34rem;
+    margin-bottom: 2.25rem;
+  }
+
+  .hero-text h1 {
+    font-family: "Cormorant Garamond", serif;
+    font-weight: 600;
+    font-size: clamp(1.9rem, 4vw, 2.7rem);
+    line-height: 1.25;
+    margin: 0 0 1rem;
+    color: var(--text);
+  }
+
+  .hero-text p {
+    font-size: 0.98rem;
+    line-height: 1.75;
+    font-weight: 300;
+    color: var(--text-soft);
+    margin: 0;
+  }
+
+  .cta {
+    display: inline-block;
+    background: var(--teal-dark);
+    color: var(--cream);
+    text-decoration: none;
+    font-size: 0.85rem;
+    letter-spacing: 0.1em;
+    padding: 0.9rem 2.3rem;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: background 0.25s ease, color 0.25s ease, transform 0.3s ease;
+  }
+
+  .cta:hover,
+  .cta:focus-visible {
+    background: var(--teal);
+    color: #ffffff;
+    transform: translateX(-10px);
+  }
+
+  /* ---------- Shaped slideshow frame ---------- */
+  .shape-frame {
+    position: relative;
+    width: 100%;
+    max-width: 836px;
+    min-width: 320px;
+    aspect-ratio: 4 / 5;
+    border-radius: 42% 58% 65% 35% / 45% 40% 60% 55%;
+    overflow: hidden;
+    box-shadow: 0 24px 60px rgba(0, 84, 97, 0.28);
+    height:700px;
+    position: relative;
+    top: -192px;
+    right: -76px;
+  }
+
+  .slide-track {
+    display: flex;
+    width: 400%;
+    height: 100%;
+    animation: slide-move 18s infinite ease-in-out;
+  }
+
+  .slide {
+    flex: 0 0 25%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+  }
+
+  .slide:nth-child(1),
+  .slide:nth-child(4) {
+    background-image: url("https://images.unsplash.com/photo-1780283574760-e8d7fd944da5?fm=jpg&q=70&w=2400&auto=format&fit=crop");
+  }
+
+  .slide:nth-child(2) {
+    background-image: url("https://images.unsplash.com/photo-1758448500688-3ababa93fd67?fm=jpg&q=70&w=2400&auto=format&fit=crop");
+  }
+
+  .slide:nth-child(3) {
+    background-image: url("https://images.unsplash.com/photo-1716667282993-cd8f2bffb91f?fm=jpg&q=70&w=2400&auto=format&fit=crop");
+  }
+
+  @keyframes slide-move {
+    0%   { transform: translateX(0%); }
+    28%  { transform: translateX(0%); }
+    33%  { transform: translateX(-25%); }
+    61%  { transform: translateX(-25%); }
+    66%  { transform: translateX(-50%); }
+    94%  { transform: translateX(-50%); }
+    100% { transform: translateX(-75%); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .slide-track { animation: none; }
+  }
+
+  @media (max-width: 900px) {
+    .page-layout { padding-left: 1.75rem; padding-right: 1.75rem; }
+    .topbar { padding-left: 1.75rem; }
+    .left-col, .right-col { align-items: center; text-align: center; flex-basis: 100%; }
+    .left-col { align-items: center; }
+    .brand-row { justify-content: center; }
+    .shape-frame { max-width: 90vw; }
+  }
+
+  /* ---------- Footer ---------- */
+  footer {
+    background: var(--teal-dark);
+    padding: 1.5rem 1.5rem;
+    text-align: center;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+  }
+
+  .footer__links {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1.75rem;
+    margin-bottom: 0.85rem;
+  }
+
+  .footer__links a,
+  .footer__links button {
+    all: unset;
+    cursor: pointer;
+    color: rgba(244, 244, 244, 0.85);
+    font-size: 0.85rem;
+    letter-spacing: 0.02em;
+    display: inline-block;
+    transition: color 0.2s ease, transform 0.3s ease;
+  }
+
+  .footer__links a:hover,
+  .footer__links button:hover {
+    color: var(--cream);
+    text-decoration: underline;
+    transform: translateX(-6px);
+  }
+
+  .footer__copy {
+    font-size: 0.78rem;
+    color: rgba(244, 244, 244, 0.6);
+    margin: 0;
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <p class="topbar__label">Hotel Management System</p>
+</div>
+
+<div class="page-layout">
+  <div class="left-col">
+    <div class="brand-row">
+      <div class="brand-row__logo">
+        <img src="luxestay-logo.png" alt="LUXESTAY Hotel logo">
+      </div>
+      <span class="brand-row__name">LUXESTAY</span>
+    </div>
+
+    <div class="hero-text">
+      <h1>An Elegant Escape into Botanical Luxury</h1>
+      <p>
+        Experience award-winning eco-resorts across top global cities, featuring
+        premium organic design, thermal spas, and sustainable dining.
+      </p>
+    </div>
+
+    <a class="cta" href="http://localhost:5173/?signup=true">Get Started &rarr;</a>
+  </div>
+
+  <div class="right-col">
+    <div class="shape-frame">
+      <div class="slide-track">
+        <div class="slide"></div>
+        <div class="slide"></div>
+        <div class="slide"></div>
+        <div class="slide"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="footer__links">
+    <a href="frontend/public/cancellation-policy.html">Terms &amp; Conditions</a>
+    <a href="frontend/public/Guest_policy.html">Guest &amp; Privacy Policies</a>
+  </div>
+  <p class="footer__copy">&copy; 2026 LUXESTAY Hotels Ltd. All rights reserved. Designed for premium professional excellence.</p>
+</footer>
+
+</body>
+</html>

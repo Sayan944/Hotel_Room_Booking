@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LUXESTAY — Cancellation Policy</title>
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,400&family=Jost:wght@300;400;500;600&display=swap");
+
+    :root {
+      --cream: #FBFFE4;
+      --teal: #3D8D7A;
+      --teal-dark: #2C6A5B;
+      --teal-tint: #E7F2ED;
+      --ink: #1F2B27;
+      --ink-soft: #4C5A55;
+      --line: #D8E4D0;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--cream);
+      color: var(--ink);
+      font-family: "Jost", -apple-system, sans-serif;
+      font-weight: 300;
+      line-height: 1.65;
+    }
+
+    a {
+      color: var(--teal-dark);
+    }
+
+    header {
+      background: var(--teal);
+      width: 100%;
+    }
+
+    /* Hero */
+    .hero {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      column-gap: 2.25rem;
+      text-align: left;
+      padding: 3rem 1.5rem;
+      color: var(--cream);
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    @media (max-width: 640px) {
+      .hero {
+        grid-template-columns: 1fr;
+        justify-items: center;
+        text-align: center;
+        row-gap: 1rem;
+      }
+    }
+
+    .hero__logo {
+      grid-row: 1 / -1;
+      grid-column: 1;
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 18px rgba(31, 43, 39, 0.18);
+    }
+
+    @media (max-width: 640px) {
+      .hero__logo {
+        grid-row: auto;
+        grid-column: auto;
+      }
+    }
+
+    .hero__logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .eyebrow {
+      grid-column: 2;
+      grid-row: 1;
+      text-transform: uppercase;
+      letter-spacing: 0.28em;
+      font-size: 0.7rem;
+      color: var(--cream);
+      opacity: 0.85;
+      margin: 0px 0 4.75rem;
+    }
+
+    .hero h1 {
+      grid-column: 2;
+      grid-row: 1;
+      font-family: "Cormorant Garamond", serif;
+      font-weight: 500;
+      font-size: clamp(2.1rem, 5vw, 3.2rem);
+      margin: 28px 0 0rem;
+    }
+
+    .hero__sub {
+      grid-column: 2;
+      grid-row: 1;
+      max-width: 34rem;
+      margin: 0;
+      font-size: 0.95rem;
+      opacity: 0.9;
+      margin: 120px 0 0rem;
+    }
+
+    @media (max-width: 640px) {
+
+      .eyebrow,
+      .hero h1,
+      .hero__sub {
+        grid-column: 1;
+      }
+
+      .hero__sub {
+        margin: 0 auto;
+      }
+    }
+
+
+    /* Layout */
+    .layout {
+      display: grid;
+      grid-template-columns: 260px minmax(0, 1fr);
+      gap: 3rem;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 3.5rem 1.5rem 6rem;
+    }
+
+    @media (max-width: 860px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Side nav */
+    .side-nav {
+      position: sticky;
+      top: 1.5rem;
+      align-self: start;
+    }
+
+    @media (max-width: 860px) {
+      .side-nav {
+        position: static;
+      }
+    }
+
+    .side-nav__title {
+      text-transform: uppercase;
+      letter-spacing: 0.22em;
+      font-size: 0.68rem;
+      color: var(--teal-dark);
+      margin: 0 0 0.75rem;
+    }
+
+    .side-nav ol {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      border-left: 1px solid var(--line);
+    }
+
+    .side-nav li a {
+      display: block;
+      padding: 0.5rem 0 0.5rem 1rem;
+      margin-left: -1px;
+      border-left: 1px solid transparent;
+      color: var(--ink-soft);
+      text-decoration: none;
+      font-size: 0.86rem;
+      transition: color 0.2s ease, border-color 0.2s ease;
+    }
+
+    .side-nav li a:hover,
+    .side-nav li a:focus-visible {
+      color: var(--teal);
+      border-left: 1px solid var(--teal);
+    }
+
+    /* Content */
+    .content {
+      min-width: 0;
+    }
+
+    .group-intro {
+      padding-bottom: 2rem;
+      margin-bottom: 1rem;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .group-tag {
+      display: inline-block;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      font-size: 0.68rem;
+      color: var(--teal-dark);
+      background: var(--teal-tint);
+      padding: 0.3rem 0.7rem;
+      border-radius: 999px;
+      margin-bottom: 0.75rem;
+    }
+
+    .group-title {
+      font-family: "Cormorant Garamond", serif;
+      font-weight: 500;
+      font-size: 1.9rem;
+      margin: 0 0 0.6rem;
+      color: var(--teal-dark);
+    }
+
+    .group-intro p {
+      color: var(--ink-soft);
+      max-width: 42rem;
+      margin: 0;
+    }
+
+    .policy {
+      padding: 2.1rem 0;
+      border-bottom: 1px solid var(--line);
+      scroll-margin-top: 1.5rem;
+    }
+
+    .policy:last-of-type {
+      border-bottom: none;
+    }
+
+    .policy__head {
+      display: flex;
+      align-items: baseline;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .policy__no {
+      font-family: "Cormorant Garamond", serif;
+      color: var(--teal);
+      font-size: 0.9rem;
+      letter-spacing: 0.05em;
+      white-space: nowrap;
+    }
+
+    .policy h3 {
+      font-family: "Cormorant Garamond", serif;
+      font-weight: 500;
+      font-size: 1.5rem;
+      margin: 0;
+      color: var(--ink);
+    }
+
+    .policy ul {
+      margin: 0;
+      padding-left: 1.1rem;
+      color: var(--ink-soft);
+    }
+
+    .policy li {
+      margin-bottom: 0.55rem;
+      font-size: 0.95rem;
+    }
+
+    .policy li::marker {
+      color: var(--teal);
+    }
+
+    /* Highlight box for the cancellation window table */
+    .window-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 0.5rem;
+      font-size: 0.9rem;
+    }
+
+    .window-table th,
+    .window-table td {
+      text-align: left;
+      padding: 0.7rem 0.9rem;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .window-table th {
+      color: var(--teal-dark);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-size: 0.7rem;
+      font-weight: 500;
+    }
+
+    .window-table td {
+      color: var(--ink-soft);
+    }
+
+    /* Footer */
+    .page-footer {
+      margin-top: 3rem;
+      text-align: center;
+    }
+
+    .page-footer__rule {
+      width: 40px;
+      height: 1px;
+      background: var(--teal);
+      margin: 0 auto 1.25rem;
+    }
+
+    .page-footer p {
+      color: var(--ink-soft);
+      font-size: 0.88rem;
+    }
+
+    .page-footer a {
+      color: var(--teal-dark);
+      text-decoration: none;
+      border-bottom: 1px solid var(--teal);
+    }
+  </style>
+</head>
+
+<body>
+
+  <header class="hero">
+    <img src="logo.png" alt="LUXESTAY Hotel logo" class="hero__logo">
+    <p class="eyebrow">LUXESTAY &middot; Guest Directory</p>
+    <h1>Cancellation Policy</h1>
+    <p class="hero__sub">How reservation changes, cancellations, and refunds are handled across all LUXESTAY properties.
+      Last updated July 1, 2026.</p>
+  </header>
+  <div class="layout">
+
+    <nav class="side-nav" aria-label="Cancellation policy sections">
+      <p class="side-nav__title">On this page</p>
+      <ol>
+        <li><a href="#standard-window">Standard Cancellation Window</a></li>
+        <li><a href="#non-refundable">Non-Refundable Rates</a></li>
+        <li><a href="#late-noshow">Late Cancellations &amp; No-Shows</a></li>
+        <li><a href="#early-departure">Early Departure</a></li>
+        <li><a href="#group-bookings">Group &amp; Event Bookings</a></li>
+        <li><a href="#peak-season">Peak Season &amp; Holidays</a></li>
+        <li><a href="#modifications">Modifying a Reservation</a></li>
+        <li><a href="#refunds">Refund Processing</a></li>
+        <li><a href="#force-majeure">Exceptional Circumstances</a></li>
+        <li><a href="#how-to-cancel">How to Cancel</a></li>
+      </ol>
+    </nav>
+
+    <main class="content">
+
+      <section class="group-intro">
+        <span class="group-tag">Policy</span>
+        <h2 class="group-title">Cancellation &amp; Refund Terms</h2>
+        <p>These terms apply to all reservations made directly with LUXESTAY, unless a specific rate or promotion states
+          different conditions at the time of booking.</p>
+      </section>
+
+      <section class="policy" id="standard-window">
+        <div class="policy__head"><span class="policy__no">No. 01</span>
+          <h3>Standard Cancellation Window</h3>
+        </div>
+        <ul>
+          <li>Flexible-rate reservations can be cancelled free of charge up to 48 hours before the scheduled arrival
+            date.</li>
+          <li>Cancellations made within 48 hours of arrival are charged the equivalent of one night's stay plus
+            applicable taxes.</li>
+          <li>The exact cut-off time and time zone for your reservation are shown in your booking confirmation email.
+          </li>
+        </ul>
+        <table class="window-table">
+          <tr>
+            <th>Cancel before arrival</th>
+            <th>Charge</th>
+          </tr>
+          <tr>
+            <td>48 hours or more</td>
+            <td>No charge — full refund</td>
+          </tr>
+          <tr>
+            <td>Less than 48 hours</td>
+            <td>One night's stay + tax</td>
+          </tr>
+          <tr>
+            <td>No-show</td>
+            <td>Full stay charged</td>
+          </tr>
+        </table>
+      </section>
+
+      <section class="policy" id="non-refundable">
+        <div class="policy__head"><span class="policy__no">No. 02</span>
+          <h3>Non-Refundable Rates</h3>
+        </div>
+        <ul>
+          <li>Reservations booked under a "non-refundable" or "advance purchase" rate are paid in full at the time of
+            booking and are not eligible for a refund upon cancellation.</li>
+          <li>Non-refundable bookings may still be eligible for a rebooking credit at the property's discretion, valid
+            for 12 months, in cases of documented medical or family emergencies.</li>
+          <li>Rate type is always clearly labeled at checkout before payment is confirmed.</li>
+        </ul>
+      </section>
+
+      <section class="policy" id="late-noshow">
+        <div class="policy__head"><span class="policy__no">No. 03</span>
+          <h3>Late Cancellations &amp; No-Shows</h3>
+        </div>
+        <ul>
+          <li>A "no-show" occurs when a guest does not arrive by 6:00 AM the day after the scheduled check-in date
+            without prior notice.</li>
+          <li>No-shows are charged the full first night's rate, and the remaining nights of the reservation are
+            released.</li>
+          <li>Repeated no-shows on an account may result in a requirement for prepayment on future bookings.</li>
+        </ul>
+      </section>
+
+      <section class="policy" id="early-departure">
+        <div class="policy__head"><span class="policy__no">No. 04</span>
+          <h3>Early Departure</h3>
+        </div>
+        <ul>
+          <li>Guests who choose to check out earlier than their reserved departure date are not entitled to a refund for
+            unused nights, unless arranged with the front desk prior to check-in.</li>
+          <li>Early departure fees, if any, will be disclosed at check-in for the specific rate booked.</li>
+        </ul>
+      </section>
+
+      <section class="policy" id="group-bookings">
+        <div class="policy__head"><span class="policy__no">No. 05</span>
+          <h3>Group &amp; Event Bookings</h3>
+        </div>
+        <ul>
+          <li>Bookings of 5 rooms or more, and event or wedding block bookings, follow a separate cancellation schedule
+            outlined in the group contract.</li>
+          <li>Group cancellations typically require 30 days' notice to avoid a cancellation fee; exact terms are
+            confirmed at the time of quotation.</li>
+        </ul>
+      </section>
+
+      <section class="policy" id="peak-season">
+        <div class="policy__head"><span class="policy__no">No. 06</span>
+          <h3>Peak Season &amp; Holiday Bookings</h3>
+        </div>
+        <ul>
+          <li>Reservations spanning major holidays or peak local events may require a longer cancellation window,
+            typically 7 to 14 days before arrival.</li>
+          <li>Any extended cancellation window applicable to your dates will be clearly stated before you confirm your
+            booking.</li>
+        </ul>
+      </section>
+
+      <section class="policy" id="modifications">
+        <div class="policy__head"><span class="policy__no">No. 07</span>
+          <h3>Modifying a Reservation</h3>
+        </div>
+        <ul>
+          <li>Date changes and room changes are treated as a new booking request and are subject to availability and any
+            rate difference.</li>
+          <li>Modifications to flexible-rate bookings can be made free of charge up to 48 hours before arrival.</li>
+          <li>Non-refundable rates generally cannot be modified; contact the property directly to discuss options.</li>
+        </ul>
+      </section>
+
+      <section class="policy" id="refunds">
+        <div class="policy__head"><span class="policy__no">No. 08</span>
+          <h3>Refund Processing</h3>
+        </div>
+        <ul>
+          <li>Eligible refunds are issued to the original payment method within 5 to 10 business days of cancellation.
+          </li>
+          <li>Processing times beyond that window are typically due to the guest's card issuer or bank, not LUXESTAY.
+          </li>
+          <li>A confirmation email is sent once a refund has been initiated on our end.</li>
+        </ul>
+      </section>
+
+      <section class="policy" id="force-majeure">
+        <div class="policy__head"><span class="policy__no">No. 09</span>
+          <h3>Exceptional Circumstances</h3>
+        </div>
+        <ul>
+          <li>In the event of natural disasters, government travel restrictions, or other circumstances beyond a guest's
+            control, LUXESTAY may waive standard cancellation fees at its discretion.</li>
+          <li>Supporting documentation may be requested to process an exceptional cancellation.</li>
+        </ul>
+      </section>
+
+      <section class="policy" id="how-to-cancel">
+        <div class="policy__head"><span class="policy__no">No. 10</span>
+          <h3>How to Cancel</h3>
+        </div>
+        <ul>
+          <li>Cancel online using the link in your booking confirmation email, through your LUXESTAY account, or by
+            calling the property directly.</li>
+          <li>You will receive a cancellation confirmation number — please retain it for your records.</li>
+          <li>Cancellations made through a third-party booking site must be processed through that site's cancellation
+            policy and channel.</li>
+        </ul>
+      </section>
+
+      <footer class="page-footer">
+        <div class="page-footer__rule"></div>
+        <p>Questions about a specific reservation? Contact the front desk or write to <a
+            href="mailto:reservations@luxestay.example">reservations@luxestay.example</a>.</p>
+      </footer>
+
+    </main>
+  </div>
+
+</body>
+
+</html>
