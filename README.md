@@ -1,4 +1,4 @@
-# Hotel Room Booking System 
+# LUXESTAY - Hotel Room Booking System 
 
 ## Project Overview : The Hotel Room Booking System is a full-stack web application designed to automate hotel operations. The system provides separate dashboards and functionalities for different types of users (system admin, registered guests, and front-desk staffs), ensuring secure access and efficient management of hotel services.
 
@@ -17,12 +17,12 @@ Guests can:
 - Cancel bookings
 - Check booking status
 - Submit ratings and reviews
-- Request for Services
+- Request services
 
 # 2. Front Desk Panel
 Front Desk staff can:
 - Check-in guests
-- Check-out guests
+- Check out guests
 - Manage reservations
 - Search guest records
 - Assign Housekeeping Staff
@@ -108,12 +108,12 @@ HotelRoomBooking
 ├── index.html
 ├── style.css
 |
-└── README_MODIFIED.md
+└── README.md
 
 # Description of Important Files
 
 ## Root Folder
-# 1. README_MODIFIED.md :
+# 1. README.md :
 Contains complete project documentation and instructions for running the project.
 
 # 2. app.js :
@@ -216,7 +216,7 @@ Contains installed frontend libraries.
 1. Install MySQL.
 2. Create the required database. (Example: CREATE DATABASE hotel_management;)
 3. Import the SQL file (provided). (mysql -u root -p < database.sql)
-4. to Update the database credentials inside: backend/.env or backend/db.js
+4. Update the database credentials inside: backend/.env or backend/db.js
 
 # Installation
 
@@ -230,8 +230,9 @@ npm start : *Backend server will start at `http://localhost:5000`* or any other 
 
 # 3. Frontend Setup
 Navigate to the `frontend` directory: cd frontend
-(Install the required frontend packages, if not already) : npm install  
-npm run dev : *Frontend application will start at `http://localhost:5173`* or any other port specified in the cmd terminal
+(Install the required frontend packages, if not already) : npm install  :  installs all required dependencies.
+npm run build: generates the production `dist` folder.
+npm run dev: starts the frontend development server. *Frontend application will start at `http://localhost:5173`* or any other port specified in the cmd terminal
 
 #  Default Demo Accounts used
 
@@ -243,7 +244,7 @@ npm run dev : *Frontend application will start at `http://localhost:5173`* or an
 
 # Checking the Output
 
-After opening the application: Login page appears.
+After opening the application, the login page appears.
 After successful login: Dashboard loads according to the selected role
 
 Verify the following modules:
@@ -256,7 +257,7 @@ Verify the following modules:
 - Feedback
 - Ratings
 - Revenue / monthly report
-- check in / check out
+- Check-in / check-out
 - services
 Verify database changes in MySQL after each operation.
 
@@ -269,7 +270,7 @@ Frontend: http://localhost:5173
 # Troubleshooting Operations :-
 
 # 1. Port Already in Use
-Change the port number in : backend/.env or server.js
+Change the port number in: backend/.env or server.js
 
 # 2. Database Connection Error
 Check:
@@ -285,17 +286,17 @@ Check:
     npm -v
 
 # 4. Module Not Found
-Run: npm install inside both backend and frontend
+Run: npm install inside both the backend and frontend
 
 # Future Improvements
 
 - Online Payment Gateway
 - Email Notifications
 - SMS Notifications
-- Multi Language Support
+- Multi-Language Support
 - Report Export (PDF/Excel)
 - Mobile app Integration
-- Feedback Delete and Reply to Guests Feedbacks
+- Feedback Delete and Reply to Guest Feedback
 
 # Contributors : Developed as a Group Project.
 

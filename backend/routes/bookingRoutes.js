@@ -34,14 +34,18 @@ function validateAadhaar(aadhaarStr) {
 }
 
 function getTodayString() {
-    return new Date().toISOString().split('T')[0];
+    const d = new Date();
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    return `${yyyy}-${mm}-${dd}`;
 }
 
 async function autoExpirePastCheckIns(db) {
     const todayStr = getTodayString();
     try {
         const [expiredBookings] = await db.query(
-            'SELECT bid, rid FROM Booking WHERE bsts = ? AND DATE_FORMAT(cindt, "%Y-%m-%d") < ?',
+            'SELECT bid, rid FROM Booking WHERE bsts = ? AND DATE_FORMAT(coutdt, "%Y-%m-%d") <= ?',
             ['Confirmed', todayStr]
         );
         for (let b of expiredBookings) {
@@ -89,7 +93,7 @@ router.get('/my', verifyToken, requireRole('guest'), async (req, res) => {
                 b.brating as rating,
                 b.bfeedback as feedback
             FROM Booking b
-            JOIN Guests g ON b.gid = g.gid
+            LEFT JOIN Guests g ON b.gid = g.gid
             JOIN Rooms r ON b.rid = r.rid
             LEFT JOIN Property p ON b.pid = p.pid
             LEFT JOIN Final_Bill fb ON b.bid = fb.bid
@@ -238,11 +242,21 @@ router.post('/', verifyToken, requireRole('guest', 'frontdesk', 'admin'), async 
 // Guest: Request Service / Housekeeping for Stay
 router.post('/:id/services', verifyToken, requireRole('guest'), async (req, res) => {
     const { id } = req.params;
-    const { type, details, cost = 0 } = req.body;
+    const { type, details, cost } = req.body;
 
     if (!type || !details) {
         return res.status(400).json({ error: 'Service type and details are required.' });
     }
+
+    const SERVICE_PRICES = {
+        'Room Service': 450,
+        'Gourmet Indian Dining': 450,
+        'Housekeeping': 0,
+        'Laundry': 350,
+        'Towel Refresh': 0,
+        'Spa': 1800
+    };
+    const finalCost = (cost !== undefined && cost !== null && cost !== '') ? Number(cost) : (SERVICE_PRICES[type] || 0);
 
     try {
         const db = getDB();
@@ -269,14 +283,14 @@ router.post('/:id/services', verifyToken, requireRole('guest'), async (req, res)
         const reqTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
         await db.query(
             'INSERT INTO Service (sid, bid, sname, sdescp, scost, sstatus, sreqat) VALUES (?, ?, ?, ?, ?, ?, ?)',
-            [sid, id, type, details, Number(cost), 'Pending', reqTime]
+            [sid, id, type, details, finalCost, 'Pending', reqTime]
         );
 
         const newService = {
             id: sid,
             type,
             details,
-            cost: Number(cost),
+            cost: finalCost,
             status: 'Pending',
             requestedAt: reqTime
         };
@@ -321,7 +335,7 @@ router.get('/', verifyToken, requireRole(['admin', 'frontdesk']), async (req, re
                 fb.fbservicesamt as finalBillServicesAmount,
                 fb.fbgeneratedat as finalBillGeneratedAt
             FROM Booking b
-            JOIN Guests g ON b.gid = g.gid
+            LEFT JOIN Guests g ON b.gid = g.gid
             JOIN Rooms r ON b.rid = r.rid
             LEFT JOIN Property p ON b.pid = p.pid
             LEFT JOIN Final_Bill fb ON b.bid = fb.bid
@@ -364,7 +378,7 @@ router.patch('/:id/status', verifyToken, requireRole(['admin', 'frontdesk']), as
         const [bookings] = await db.query(`
             SELECT b.bid, b.rid, b.gid, g.gname as guestName, g.email as guestEmail, g.gaadhar as guestAadhar, DATE_FORMAT(b.cindt, "%Y-%m-%d") as checkInDate, DATE_FORMAT(b.coutdt, "%Y-%m-%d") as checkOutDate, b.bamt, b.bdeposit 
             FROM Booking b
-            JOIN Guests g ON b.gid = g.gid
+            LEFT JOIN Guests g ON b.gid = g.gid
             WHERE b.bid = ?
         `, [id]);
         
@@ -376,13 +390,13 @@ router.patch('/:id/status', verifyToken, requireRole(['admin', 'frontdesk']), as
         const todayStr = getTodayString();
 
         if (status === 'CheckedIn') {
-            if (booking.checkInDate < todayStr) {
+            if (todayStr < booking.checkInDate) {
+                return res.status(400).json({ error: `Check-in is permitted starting on ${booking.checkInDate}. Today is ${todayStr}.` });
+            }
+            if (todayStr >= booking.checkOutDate) {
                 await db.query('UPDATE Booking SET bsts = ? WHERE bid = ?', ['Expired', id]);
                 await db.query('UPDATE Rooms SET rsts = ? WHERE rid = ?', ['Available', booking.rid]);
-                return res.status(400).json({ error: `Cannot check in: Check-in date (${booking.checkInDate}) has passed. This reservation has expired.` });
-            }
-            if (booking.checkInDate > todayStr) {
-                return res.status(400).json({ error: `Check-in is only permitted on the check-in date (${booking.checkInDate}). Today is ${todayStr}.` });
+                return res.status(400).json({ error: `Cannot check in: Stay period ending on ${booking.checkOutDate} has already passed. This reservation has expired.` });
             }
         }
 
@@ -397,9 +411,9 @@ router.patch('/:id/status', verifyToken, requireRole(['admin', 'frontdesk']), as
             
             // Auto generate final bill on checkout
             const [services] = await db.query('SELECT SUM(scost) as total FROM Service WHERE bid = ?', [id]);
-            const servicesTotal = services[0].total || 0;
-            const roomAmount = booking.bamt || 0;
-            const advanceDepositPaid = booking.bdeposit || Math.round(roomAmount * 0.20);
+            const servicesTotal = Number(services[0].total) || 0;
+            const roomAmount = Number(booking.bamt) || 0;
+            const advanceDepositPaid = Number(booking.bdeposit) || Math.round(roomAmount * 0.20);
             const finalBillAmount = Math.max(0, (roomAmount + servicesTotal) - advanceDepositPaid);
             const fbid = 'FBIL-' + Date.now().toString().slice(-6);
             const generatedAt = new Date().toISOString();
@@ -465,7 +479,7 @@ router.post('/:id/cancel', verifyToken, requireRole(['guest', 'admin', 'frontdes
         const [bookings] = await db.query(`
             SELECT b.bid, b.gid, b.bsts, b.rid, g.email as guestEmail 
             FROM Booking b 
-            JOIN Guests g ON b.gid = g.gid 
+            LEFT JOIN Guests g ON b.gid = g.gid 
             WHERE b.bid = ?
         `, [id]);
         
@@ -511,12 +525,12 @@ router.post('/:id/final-bill', verifyToken, requireRole(['admin', 'frontdesk']),
             return res.status(404).json({ error: 'Booking not found.' });
         }
         
-        const roomAmount = bookings[0].bamt || 0;
+        const roomAmount = Number(bookings[0].bamt) || 0;
         
         const [services] = await db.query('SELECT SUM(scost) as total FROM Service WHERE bid = ?', [id]);
-        const servicesTotal = services[0].total || 0;
+        const servicesTotal = Number(services[0].total) || 0;
         
-        const advanceDepositPaid = bookings[0].bdeposit || Math.round(roomAmount * 0.20);
+        const advanceDepositPaid = Number(bookings[0].bdeposit) || Math.round(roomAmount * 0.20);
         const finalBillAmount = Math.max(0, (roomAmount + servicesTotal) - advanceDepositPaid);
 
         const fbid = 'FBIL-' + Date.now().toString().slice(-6);

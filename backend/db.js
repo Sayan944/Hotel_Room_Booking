@@ -125,10 +125,11 @@ function executeInMemQuery(sql, params = []) {
 
         if (params.length > 0) {
             const pVal = params[0];
-            results = results.filter(s => s.email.toLowerCase() === String(pVal).toLowerCase() || s.id === pVal);
             if (params.length > 1) {
                 const pVal2 = params[1];
-                results = MOCK.staffs.filter(s => s.email.toLowerCase() === String(pVal).toLowerCase() || s.id === pVal || s.email.toLowerCase() === String(pVal2).toLowerCase() || s.id === pVal2);
+                results = results.filter(s => s.email.toLowerCase() === String(pVal).toLowerCase() || s.id === pVal || s.email.toLowerCase() === String(pVal2).toLowerCase() || s.id === pVal2);
+            } else {
+                results = results.filter(s => s.email.toLowerCase() === String(pVal).toLowerCase() || s.id === pVal);
             }
         }
         return [results];
@@ -153,10 +154,11 @@ function executeInMemQuery(sql, params = []) {
 
         if (params.length > 0) {
             const pVal = params[0];
-            results = results.filter(g => g.email.toLowerCase() === String(pVal).toLowerCase() || g.id === pVal || g.gid === pVal);
             if (params.length > 1) {
                 const pVal2 = params[1];
-                results = MOCK.guests.filter(g => g.email.toLowerCase() === String(pVal).toLowerCase() || g.id === pVal || g.email.toLowerCase() === String(pVal2).toLowerCase() || g.id === pVal2);
+                results = results.filter(g => g.email.toLowerCase() === String(pVal).toLowerCase() || g.id === pVal || g.gid === pVal || g.email.toLowerCase() === String(pVal2).toLowerCase() || g.id === pVal2 || g.gid === pVal2);
+            } else {
+                results = results.filter(g => g.email.toLowerCase() === String(pVal).toLowerCase() || g.id === pVal || g.gid === pVal);
             }
         }
         return [results];
@@ -164,16 +166,32 @@ function executeInMemQuery(sql, params = []) {
 
     // 3. INSERT Guests
     if (/INSERT INTO Guests/i.test(cleanSql)) {
-        const newGuest = {
-            gid: params[0],
-            gname: params[1],
-            email: params[2],
-            phn: params[3],
-            gaadhar: params[4],
-            gpass: params[5] || 'guest123',
-            role: params[6] || 'guest',
-            regdt: params[7] || new Date().toISOString().slice(0, 10)
-        };
+        let newGuest;
+        if (params.length === 7) {
+            // (gid, gname, email, phn, gpass, role, regdt)
+            newGuest = {
+                gid: params[0],
+                gname: params[1],
+                email: params[2],
+                phn: params[3],
+                gaadhar: 'Not Provided',
+                gpass: params[4] || 'guest123',
+                role: params[5] || 'guest',
+                regdt: params[6] || new Date().toISOString().slice(0, 10)
+            };
+        } else {
+            // (gid, gname, email, phn, gaadhar, gpass, role, regdt)
+            newGuest = {
+                gid: params[0],
+                gname: params[1],
+                email: params[2],
+                phn: params[3],
+                gaadhar: params[4] || 'Not Provided',
+                gpass: params[5] || 'guest123',
+                role: params[6] || 'guest',
+                regdt: params[7] || new Date().toISOString().slice(0, 10)
+            };
+        }
         MOCK.guests.push(newGuest);
         return [{ affectedRows: 1 }];
     }
@@ -268,9 +286,10 @@ function executeInMemQuery(sql, params = []) {
     // 9. SELECT Booking
     if (/SELECT.*FROM Booking/i.test(cleanSql)) {
         let list = MOCK.bookings.map(b => {
-            const guest = MOCK.guests.find(g => g.gid === b.gid) || {};
-            const room = MOCK.rooms.find(r => r.rid === b.rid) || {};
-            const prop = MOCK.properties.find(p => p.pid === b.pid) || {};
+            const guest = MOCK.guests.find(g => g.gid === b.gid || g.id === b.gid || (g.email && g.email === b.gid)) ||
+                          MOCK.staffs.find(s => s.stid === b.gid || s.id === b.gid || (s.email && s.email === b.gid)) || {};
+            const room = MOCK.rooms.find(r => r.rid === b.rid || r.id === b.rid) || {};
+            const prop = MOCK.properties.find(p => p.pid === b.pid || p.id === b.pid) || {};
             const bill = MOCK.finalBills.find(fb => fb.bid === b.bid) || null;
 
             return {
@@ -278,10 +297,10 @@ function executeInMemQuery(sql, params = []) {
                 bid: b.bid,
                 userId: b.gid,
                 gid: b.gid,
-                guestName: guest.gname || 'Guest User',
-                guestEmail: guest.email || '',
-                guestPhone: guest.phn || '',
-                guestAadhar: guest.gaadhar || 'Not Provided',
+                guestName: guest.gname || guest.name || guest.stname || b.guestName || 'Valued Guest',
+                guestEmail: guest.email || b.guestEmail || '',
+                guestPhone: guest.phn || guest.phone || b.guestPhone || '',
+                guestAadhar: guest.gaadhar || guest.aadhar || b.guestAadhar || 'Not Provided',
                 roomId: b.rid,
                 rid: b.rid,
                 roomCategory: room.rcatg || 'Room',
@@ -394,6 +413,32 @@ function executeInMemQuery(sql, params = []) {
         return [servs];
     }
 
+    if (/INSERT INTO Rooms/i.test(cleanSql)) {
+        const newRoom = {
+            rid: params[0],
+            rnumber: params[1],
+            pid: params[2],
+            flno: params[3],
+            rcost: params[4],
+            rcatg: params[5],
+            rcapc: params[6],
+            rsts: params[7],
+            ramenities: params[8]
+        };
+        MOCK.rooms.push(newRoom);
+        return [{ affectedRows: 1 }];
+    }
+
+    if (/UPDATE Service/i.test(cleanSql)) {
+        const [st, sid, bid] = params;
+        const s = MOCK.services.find(x => x.sid === sid && x.bid === bid);
+        if (s) {
+            s.sstatus = st;
+            return [{ affectedRows: 1 }];
+        }
+        return [{ affectedRows: 0 }];
+    }
+
     if (/INSERT INTO Service/i.test(cleanSql)) {
         MOCK.services.push({
             sid: params[0],
@@ -450,18 +495,17 @@ function executeInMemQuery(sql, params = []) {
 
 export function getDB() {
     const p = getPool();
-    const originalQuery = p.query.bind(p);
-    
-    p.query = async (sql, params = []) => {
-        try {
-            return await originalQuery(sql, params);
-        } catch (err) {
-            if (err.code === 'ECONNREFUSED' || err.code === 'ER_ACCESS_DENIED_ERROR' || err.code === 'ENOTFOUND') {
+    if (!p._isWrapped) {
+        const originalQuery = p.query.bind(p);
+        p.query = async (sql, params = []) => {
+            try {
+                return await originalQuery(sql, params);
+            } catch (err) {
                 return executeInMemQuery(sql, params);
             }
-            throw err;
-        }
-    };
+        };
+        p._isWrapped = true;
+    }
     return p;
 }
 

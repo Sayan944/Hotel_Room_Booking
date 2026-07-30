@@ -6,6 +6,14 @@ import { JWT_SECRET, verifyToken } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
+function getLocalDateString() {
+    const d = new Date();
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    return `${yyyy}-${mm}-${dd}`;
+}
+
 // Register New User (Guest by default, or Admin if specified)
 router.post('/register', async (req, res) => {
     const { name, email, password, role = 'guest', phone = '' } = req.body;
@@ -26,26 +34,34 @@ router.post('/register', async (req, res) => {
 
         const passwordHash = bcrypt.hashSync(password, 10);
         const resolvedRole = ['admin', 'frontdesk'].includes(role) ? role : 'guest';
+        const todayStr = getLocalDateString();
         
         let newId = '';
         if (resolvedRole === 'guest') {
             newId = 'USR-' + Date.now();
             try {
                 await db.query(
-                    'INSERT INTO Guests (gid, gname, email, phn, gpass, role, regdt) VALUES (?, ?, ?, ?, ?, ?, ?)',
-                    [newId, name, email, phone, passwordHash, resolvedRole, new Date().toISOString().slice(0, 10)]
+                    'INSERT INTO Guests (gid, gname, email, phn, gaadhar, gpass, role, regdt) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+                    [newId, name, email, phone, '', passwordHash, resolvedRole, todayStr]
                 );
             } catch(e) {
-                await db.query(
-                    'INSERT INTO Guests (gid, gname, email, phn, gpass, regdt) VALUES (?, ?, ?, ?, ?, ?)',
-                    [newId, name, email, phone, passwordHash, new Date().toISOString().slice(0, 10)]
-                );
+                try {
+                    await db.query(
+                        'INSERT INTO Guests (gid, gname, email, phn, gpass, role, regdt) VALUES (?, ?, ?, ?, ?, ?, ?)',
+                        [newId, name, email, phone, passwordHash, resolvedRole, todayStr]
+                    );
+                } catch(e2) {
+                    await db.query(
+                        'INSERT INTO Guests (gid, gname, email, phn, gpass, regdt) VALUES (?, ?, ?, ?, ?, ?)',
+                        [newId, name, email, phone, passwordHash, todayStr]
+                    );
+                }
             }
         } else {
             newId = 'ST-' + Date.now();
             await db.query(
                 'INSERT INTO Staffs (stid, stname, email, phn, pid, stsal, stjoindt, strole, spass, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-                [newId, name, email, phone, 'BR-001', 50000, new Date().toISOString().slice(0, 10), resolvedRole, passwordHash, 'Active']
+                [newId, name, email, phone, 'BR-001', 50000, todayStr, resolvedRole, passwordHash, 'Active']
             );
         }
 

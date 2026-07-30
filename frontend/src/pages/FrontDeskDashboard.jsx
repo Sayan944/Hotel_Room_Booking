@@ -151,7 +151,7 @@ export default function FrontDeskDashboard() {
     const pendingServiceOrders = bookings.flatMap(b =>
         (b.serviceRequests || [])
             .filter(s => s.status === 'Pending')
-            .map(s => ({ ...s, bookingId: b.id, guestName: b.guestName, roomNumber: b.roomNumber }))
+            .map(s => ({ ...s, bookingId: b.id, guestName: b.guestName || b.gname || 'Valued Guest', roomNumber: b.roomNumber }))
     );
 
     return (
@@ -289,36 +289,45 @@ export default function FrontDeskDashboard() {
                                                     </button>
                                                 )}
                                                 {b.status === 'CheckedIn' && (
-                                                    <button
-                                                        onClick={async () => {
-                                                            try {
-                                                                const updateRes = await api.updateBookingStatus(b.id, 'CheckedOut');
-                                                                showToast(`Guest checked out successfully!`, 'success');
-                                                                
-                                                                let billObj = updateRes.finalBill;
-                                                                if (!billObj) {
-                                                                    const billRes = await api.generateFinalBill(b.id, 'Paid').catch(() => null);
-                                                                    billObj = billRes ? billRes.finalBill : null;
+                                                    <>
+                                                        <button
+                                                            onClick={async () => {
+                                                                try {
+                                                                    const updateRes = await api.updateBookingStatus(b.id, 'CheckedOut');
+                                                                    showToast(`Guest checked out successfully!`, 'success');
+                                                                    
+                                                                    let billObj = updateRes.finalBill;
+                                                                    if (!billObj) {
+                                                                        const billRes = await api.generateFinalBill(b.id, 'Paid').catch(() => null);
+                                                                        billObj = billRes ? billRes.finalBill : null;
+                                                                    }
+
+                                                                    const freshBooking = {
+                                                                        ...b,
+                                                                        status: 'CheckedOut',
+                                                                        finalBill: billObj
+                                                                    };
+
+                                                                    setSelectedBillBooking(freshBooking);
+                                                                    setActiveTab('billing');
+                                                                    loadData();
+                                                                } catch (err) {
+                                                                    showToast(err.message, 'error');
                                                                 }
-
-                                                                const freshBooking = {
-                                                                    ...b,
-                                                                    status: 'CheckedOut',
-                                                                    finalBill: billObj
-                                                                };
-
-                                                                setSelectedBillBooking(freshBooking);
-                                                                setActiveTab('billing');
-                                                                loadData();
-                                                            } catch (err) {
-                                                                showToast(err.message, 'error');
-                                                            }
-                                                        }}
-                                                        className="btn btn-primary"
-                                                        style={{ padding: '4px 10px', fontSize: '0.75rem' }}
-                                                    >
-                                                        Check Out → Bill
-                                                    </button>
+                                                            }}
+                                                            className="btn btn-primary"
+                                                            style={{ padding: '4px 10px', fontSize: '0.75rem' }}
+                                                        >
+                                                            Check Out → Bill
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleGenerateFinalBill(b.id)}
+                                                            className="btn btn-outline"
+                                                            style={{ padding: '4px 10px', fontSize: '0.75rem' }}
+                                                        >
+                                                            Generate Bill
+                                                        </button>
+                                                    </>
                                                 )}
                                             </div>
                                         </td>
@@ -420,7 +429,20 @@ export default function FrontDeskDashboard() {
                                         <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#059669', textTransform: 'uppercase' }}>
                                             Room {order.roomNumber} &bull; {order.type}
                                         </span>
-                                        <span className="badge badge-dirty">Pending</span>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                            <span style={{
+                                                fontSize: '0.75rem',
+                                                fontWeight: 700,
+                                                color: (order.cost || 0) === 0 ? '#15803d' : '#166534',
+                                                backgroundColor: (order.cost || 0) === 0 ? '#f0fdf4' : '#dcfce7',
+                                                padding: '2px 8px',
+                                                borderRadius: '12px',
+                                                border: '1px solid #bbf7d0'
+                                            }}>
+                                                {(order.cost || 0) === 0 ? 'FREE' : `₹${(order.cost || 0).toLocaleString()}`}
+                                            </span>
+                                            <span className="badge badge-dirty">Pending</span>
+                                        </div>
                                     </div>
 
                                     <h4 style={{ fontSize: '1rem', color: '#111827', fontWeight: 600, marginBottom: '2px' }}>{order.guestName || 'Guest User'}</h4>

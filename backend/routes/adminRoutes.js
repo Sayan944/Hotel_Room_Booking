@@ -4,6 +4,14 @@ import { verifyToken, requireRole } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
+function getLocalDateString() {
+    const d = new Date();
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    return `${yyyy}-${mm}-${dd}`;
+}
+
 // Admin Dashboard KPI Summary
 router.get('/dashboard', verifyToken, requireRole('admin'), async (req, res) => {
     try {
@@ -92,7 +100,7 @@ router.post('/staff', verifyToken, requireRole('admin'), async (req, res) => {
         
         await db.query(
             'INSERT INTO Staffs (stid, stname, email, phn, pid, stsal, stjoindt, strole, spass, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-            [id, name, email, phone || '+91 98765-43210', branchId || 'BR-001', 45000, new Date().toISOString().slice(0, 10), role, '', 'Active']
+            [id, name, email, phone || '+91 98765-43210', branchId || 'BR-001', 45000, getLocalDateString(), role, '', 'Active']
         );
 
         const newStaff = {
@@ -332,7 +340,7 @@ router.get('/reviews', verifyToken, requireRole('admin'), async (req, res) => {
                 b.bfeedback as feedback,
                 COALESCE(DATE_FORMAT(b.bfeedbackdt, "%Y-%m-%d"), DATE_FORMAT(b.bdt, "%Y-%m-%d"), CURDATE()) as date
             FROM Booking b
-            JOIN Guests g ON b.gid = g.gid
+            LEFT JOIN Guests g ON b.gid = g.gid
             JOIN Rooms r ON b.rid = r.rid
             WHERE b.brating IS NOT NULL
             ORDER BY b.bfeedbackdt DESC

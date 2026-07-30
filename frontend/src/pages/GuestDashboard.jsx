@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../services/api';
 import { useAuth } from '../context/AuthContext';
-import { Search, MapPin, ConciergeBell, Bed, Star, Calendar, X, CheckCircle2, ChevronLeft, ChevronRight, ChevronDown, FileText } from 'lucide-react';
+import { Search, MapPin, ConciergeBell, Star, X, ChevronLeft, ChevronRight, ChevronDown, FileText } from 'lucide-react';
 
 export default function GuestDashboard() {
     const { user, showToast } = useAuth();
@@ -261,28 +261,7 @@ export default function GuestDashboard() {
         }
     };
 
-const verhoeffD = [
-    [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
-    [1, 2, 3, 4, 0, 6, 7, 8, 9, 5],
-    [2, 3, 4, 0, 1, 7, 8, 9, 5, 6],
-    [3, 4, 0, 1, 2, 8, 9, 5, 6, 7],
-    [4, 0, 1, 2, 3, 9, 5, 6, 7, 8],
-    [5, 9, 8, 7, 6, 0, 1, 2, 3, 4],
-    [6, 5, 9, 8, 7, 1, 0, 3, 2, 4],
-    [7, 6, 5, 9, 8, 2, 1, 0, 4, 3],
-    [8, 7, 6, 5, 9, 3, 2, 1, 4, 0],
-    [9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
-];
-const verhoeffP = [
-    [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
-    [1, 5, 7, 6, 2, 8, 3, 0, 9, 4],
-    [5, 8, 0, 3, 7, 9, 6, 1, 4, 2],
-    [8, 9, 1, 6, 0, 4, 3, 5, 2, 7],
-    [9, 4, 5, 3, 1, 2, 6, 8, 7, 0],
-    [4, 2, 8, 6, 5, 7, 3, 9, 0, 1],
-    [2, 7, 9, 3, 8, 0, 6, 4, 1, 5],
-    [7, 0, 4, 6, 9, 1, 3, 2, 5, 8]
-];
+
 
 function validateAadhaar(aadhaarStr) {
     if (!aadhaarStr) return false;
@@ -297,9 +276,10 @@ function validateAadhaar(aadhaarStr) {
             showToast('You must agree to the Terms and Conditions and Cancellation Policy to proceed.', 'error');
             return;
         }
-        const cleanedAadhar = aadharNumber.replace(/\s/g, '');
+        const effectiveAadhar = aadharNumber || (user && user.aadhar ? user.aadhar : '');
+        const cleanedAadhar = effectiveAadhar.replace(/\s/g, '');
         if (!validateAadhaar(cleanedAadhar)) {
-            showToast('Please enter a valid 12-digit Aadhaar card number.', 'error');
+            showToast('Please enter a valid 12-digit Aadhaar card number (e.g. 2847 5930 1847).', 'error');
             return;
         }
 
@@ -324,17 +304,27 @@ function validateAadhaar(aadhaarStr) {
         }
     };
 
+    const SERVICE_PRICES = {
+        'Room Service': 450,
+        'Housekeeping': 0,
+        'Laundry': 350,
+        'Towel Refresh': 0,
+        'Spa': 1800
+    };
+
     const handleRequestService = async (e) => {
         e.preventDefault();
         if (!selectedBookingForService || !serviceDetails) return;
 
+        const cost = SERVICE_PRICES[serviceType] || 0;
         setSubmittingService(true);
         try {
             await api.requestService(selectedBookingForService.id, {
                 type: serviceType,
-                details: serviceDetails
+                details: serviceDetails,
+                cost
             });
-            showToast('Service order submitted to Front Desk dispatch queue', 'success');
+            showToast(`Service order submitted (Charge: ₹${cost.toLocaleString()})`, 'success');
             setSelectedBookingForService(null);
             setServiceDetails('');
             fetchMyBookings();
@@ -1281,17 +1271,25 @@ function validateAadhaar(aadhaarStr) {
                             </div>
 
                             <div>
-                                <label style={{ fontSize: '0.8rem', color: '#0f2e1e', fontWeight: 600, display: 'block', marginBottom: '4px' }}>
-                                    Aadhar Card Number <span style={{ color: '#dc2626' }}>*</span>
-                                </label>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                                    <label style={{ fontSize: '0.8rem', color: '#0f2e1e', fontWeight: 600 }}>
+                                        Aadhaar Card Number <span style={{ color: '#dc2626' }}>*</span>
+                                    </label>
+                                    <button
+                                        type="button"
+                                        onClick={() => setAadharNumber('2847 5930 1847')}
+                                        style={{ background: 'none', border: 'none', color: '#16a34a', fontSize: '0.72rem', fontWeight: 600, cursor: 'pointer', textDecoration: 'underline' }}
+                                    >
+                                        Use Demo Aadhaar
+                                    </button>
+                                </div>
                                 <input
                                     type="text"
                                     required
                                     maxLength={14}
-                                    placeholder="Enter 12-digit Aadhar number"
-                                    value={aadharNumber}
+                                    placeholder="Enter 12-digit Aadhaar (e.g. 2847 5930 1847)"
+                                    value={aadharNumber || (user && user.aadhar ? user.aadhar : '')}
                                     onChange={(e) => {
-                                        // Allow digits and spaces only
                                         const val = e.target.value.replace(/[^\d ]/g, '');
                                         setAadharNumber(val);
                                     }}
@@ -1303,7 +1301,7 @@ function validateAadhaar(aadhaarStr) {
                                     }}
                                 />
                                 <p style={{ fontSize: '0.72rem', color: '#6b7280', marginTop: '3px', margin: '3px 0 0 0' }}>
-                                    Your Aadhar number is securely stored and used only for identity verification.
+                                    Must be exactly 12 numeric digits (e.g. 284759301847 or 2847 5930 1847).
                                 </p>
                             </div>
 
@@ -1384,12 +1382,27 @@ function validateAadhaar(aadhaarStr) {
                             <div>
                                 <label style={{ fontSize: '0.8rem', color: '#0f2e1e', fontWeight: 600, display: 'block', marginBottom: '4px' }}>Service Category</label>
                                 <select value={serviceType} onChange={(e) => setServiceType(e.target.value)} className="input-field">
-                                    <option value="Room Service">Gourmet Indian Dining (Thali, Naan, Biryani)</option>
-                                    <option value="Housekeeping">Housekeeping & Floral Jasmine Refresh</option>
-                                    <option value="Laundry">Express Kurta, Saree & Suit Dry Cleaning</option>
-                                    <option value="Towel Refresh">Extra Organic Cotton Towels & Pillows</option>
-                                    <option value="Spa">Kerala Ayurvedic Massage & Therapy</option>
+                                    <option value="Room Service">Gourmet Indian Dining — ₹450</option>
+                                    <option value="Housekeeping">Housekeeping & Floral Refresh — Complimentary (₹0)</option>
+                                    <option value="Laundry">Express Dry Cleaning & Ironing — ₹350</option>
+                                    <option value="Towel Refresh">Extra Towels & Pillows — Complimentary (₹0)</option>
+                                    <option value="Spa">Kerala Ayurvedic Spa Session — ₹1,800</option>
                                 </select>
+                            </div>
+
+                            <div style={{
+                                padding: '10px 14px',
+                                backgroundColor: '#f0fdf4',
+                                border: '1px solid #dcfce7',
+                                borderRadius: '8px',
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'center'
+                            }}>
+                                <span style={{ fontSize: '0.85rem', color: '#166534', fontWeight: 600 }}>Applicable Service Fee:</span>
+                                <span style={{ fontSize: '1rem', color: '#15803d', fontWeight: 700 }}>
+                                    {(SERVICE_PRICES[serviceType] || 0) === 0 ? 'FREE' : `₹${(SERVICE_PRICES[serviceType] || 0).toLocaleString()}`}
+                                </span>
                             </div>
 
                             <div>
@@ -1398,7 +1411,7 @@ function validateAadhaar(aadhaarStr) {
                             </div>
 
                             <button type="submit" disabled={submittingService} className="btn btn-emerald" style={{ padding: '10px', width: '100%', borderRadius: '8px' }}>
-                                {submittingService ? 'Sending...' : 'Send Request'}
+                                {submittingService ? 'Sending...' : `Submit Request (₹${(SERVICE_PRICES[serviceType] || 0).toLocaleString()})`}
                             </button>
                         </form>
                     </div>
